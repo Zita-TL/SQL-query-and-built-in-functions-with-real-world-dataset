@@ -1,0 +1,61 @@
+##Introduction
+##Using this Python notebook you will:
+##Understand 3 Chicago datasets
+##Load the 3 datasets into 3 tables in a Db2 database
+##Execute SQL queries to answer assignment questions
+
+##CONNET TO DATABASE
+##Let us first load the SQL extension and establish a connection with the database
+
+%load_ext sql
+
+##Remember the connection string is of the format:
+##%sql ibm_db_sa://my-username:my-password@my-hostname:my-port/my-db-name
+##Enter the connection string for your Db2 on Cloud database instance below
+
+%sql ibm_db_sa://my-username:my-password@my-hostname:my-port/my-db-name
+
+##1.Find the total number of crimes recorded in the CRIME table
+##Rows in Crime table
+
+%sql SELECT COUNT(*) as count_row FROM CHICAGO_CRIME_DATA;
+
+##2.Retrieve first 10 rows from the CRIME table
+
+%sql SELECT * FROM CHICAGO_CRIME_DATA LIMIT 10;
+
+##3.How many crimes involve an arrest?
+
+%sql SELECT COUNT(*) as arrest_no FROM CHICAGO_CRIME_DATA WHERE arrest = True;
+
+##4.Which unique types of crimes have been recorded at GAS STATION locations?
+
+%sql SELECT DISTINCT(primary_type) FROM CHICAGO_CRIME_DATA WHERE location_description = 'GAS STATION';
+
+##5.In the CENUS_DATA table list all Community Areas whose names start with the letter ‘B’.
+
+%sql SELECT COMMUNITY_AREA_NAME FROM CENSUS_DATA WHERE COMMUNITY_AREA_NAME LIKE 'B%';
+
+##6.Which schools in Community Areas 10 to 15 are healthy school certified?
+
+%sql SELECT NAME_OF_SCHOOL FROM CHICAGO_PUBLIC_SCHOOLS \
+WHERE (COMMUNITY_AREA_NUMBER > 9 AND COMMUNITY_AREA_NUMBER < 16) AND HEALTHY_SCHOOL_CERTIFIED = True;
+
+##7.What is the average school Safety Score?
+
+%sql SELECT AVG(SAFETY_SCORE) as avg_safety_score FROM CHICAGO_PUBLIC_SCHOOLS;
+
+##8.List the top 5 Community Areas by average College Enrollment [number of students]
+
+%sql SELECT COMMUNITY_AREA_NAME, AVG(COLLEGE_ENROLLMENT) as avg_comm_enroll \
+FROM CHICAGO_PUBLIC_SCHOOLS group by COMMUNITY_AREA_NAME order by avg_comm_enroll DESC LIMIT 5; 
+
+##9.Use a sub-query to determine which Community Area has the least value for school Safety Score?
+
+%sql SELECT COMMUNITY_AREA_NAME FROM CHICAGO_PUBLIC_SCHOOLS \
+WHERE SAFETY_SCORE = (SELECT MIN(SAFETY_SCORE) FROM CHICAGO_PUBLIC_SCHOOLS);
+
+##10.[Without using an explicit JOIN operator] Find the Per Capita Income of the Community Area which has a school Safety Score of 1
+
+%sql SELECT PER_CAPITA_INCOME, COMMUNITY_AREA_NAME,  COMMUNITY_AREA_NUMBER  FROM CENSUS_DATA \
+WHERE COMMUNITY_AREA_NUMBER IN (SELECT COMMUNITY_AREA_NUMBER FROM CHICAGO_PUBLIC_SCHOOLS WHERE SAFETY_SCORE = 1);
